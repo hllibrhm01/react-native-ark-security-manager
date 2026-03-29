@@ -1,0 +1,75 @@
+buildscript {
+  ext.ArkSecurityManager = [
+    kotlinVersion: "2.0.21",
+    minSdkVersion: 24,
+    compileSdkVersion: 36,
+    targetSdkVersion: 36
+  ]
+
+  ext.getExtOrDefault = { prop ->
+    if (rootProject.ext.has(prop)) {
+      return rootProject.ext.get(prop)
+    }
+    return ArkSecurityManager[prop]
+  }
+
+  repositories {
+    google()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "com.android.tools.build:gradle:8.7.2"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
+  }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "com.facebook.react"
+
+android {
+  namespace "com.arksecuritymanager"
+
+  compileSdkVersion getExtOrDefault("compileSdkVersion")
+
+  defaultConfig {
+    minSdkVersion getExtOrDefault("minSdkVersion")
+    targetSdkVersion getExtOrDefault("targetSdkVersion")
+  }
+
+  buildFeatures {
+    buildConfig true
+  }
+
+  buildTypes {
+    release {
+      minifyEnabled false
+      consumerProguardFiles "consumer-rules.pro"
+    }
+  }
+
+  lint {
+    disable "GradleCompatible"
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+}
+
+dependencies {
+  implementation "com.facebook.react:react-android"
+
+  // ── Local ARK Security Manager SDK ──────────────────────────────────────
+  // The native Android SDK is included as a local Gradle project.
+  // Path: ../native/android/ark-security-manager
+  // To switch to a remote Maven artifact, replace with:
+  //   implementation 'com.garantibbva.arkmobil:ark-security-manager:0.0.1-alpha.1'
+  implementation project(':ark-security-manager')
+}

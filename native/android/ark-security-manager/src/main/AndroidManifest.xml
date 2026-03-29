@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Android 11+ (API 30) enforces package visibility filtering.
+        Without a <queries> declaration, PackageManager.getPackageInfo() always throws
+        NameNotFoundException for packages that are not explicitly listed here, even if
+        they are installed — silently breaking root-app detection.
+
+        These entries are merged into the host application's final manifest by the Gradle
+        manifest merger, so the host app does not need to declare them manually.
+
+        Each package corresponds to a known root management application checked in
+        RootDetectionUtil.checkForRootApps().
+    -->
+    <queries>
+        <package android:name="com.noshufou.android.su" />
+        <package android:name="eu.chainfire.supersu" />
+        <package android:name="com.koushikdutta.superuser" />
+        <package android:name="com.thirdparty.superuser" />
+        <package android:name="com.yellowes.su" />
+        <package android:name="com.topjohnwu.magisk" />
+    </queries>
+
+</manifest>

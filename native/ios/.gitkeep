@@ -1,0 +1,11 @@
+# Place the ark-mobile-ios-module source here.
+#
+# Expected structure:
+#   native/ios/
+#   └── Modules/
+#       └── ARKSecurityManager/
+#           ├── ARKSecurityManager.podspec
+#           └── ARKSecurityManager/...
+#
+# Clone or symlink from:
+#   https://github.com/hllibrhm01/ark-mobile-ios-module

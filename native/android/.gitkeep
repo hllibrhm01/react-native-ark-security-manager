@@ -1,0 +1,10 @@
+# Place the ark-mobile-android-module source here.
+#
+# Expected structure:
+#   native/android/
+#   └── ark-security-manager/
+#       ├── build.gradle
+#       └── src/...
+#
+# Clone or symlink from:
+#   https://github.com/hllibrhm01/ark-mobile-android-module

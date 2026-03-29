@@ -1,0 +1,30 @@
+// android/settings.gradle
+//
+// Included by the host app's settings.gradle via RN autolinking.
+// Registers the local ARK Security Manager Android SDK as a Gradle subproject.
+//
+// Native SDK source: native/android/ark-security-manager
+// Version catalog:   native/android-repo/gradle/libs.versions.toml
+
+def nativeAndroidRoot = new File(rootDir, '../native/android')
+def nativeAndroidRepo  = new File(rootDir, '../native/android-repo')
+
+// ── Version catalog ──────────────────────────────────────────────────────────
+// Expose the SDK's libs.versions.toml so alias(libs.*) in its build.gradle resolves.
+// NOTE: If the host app already defines a 'libs' catalog, this may conflict.
+// In that case, merge the relevant entries manually or switch to Maven coordinates.
+gradle.settingsEvaluated {
+    it.dependencyResolutionManagement {
+        versionCatalogs {
+            if (!names.contains('libs')) {
+                libs {
+                    from(files("${nativeAndroidRepo}/gradle/libs.versions.toml"))
+                }
+            }
+        }
+    }
+}
+
+// ── Subproject ───────────────────────────────────────────────────────────────
+include ':ark-security-manager'
+project(':ark-security-manager').projectDir = new File(nativeAndroidRoot, 'ark-security-manager')
