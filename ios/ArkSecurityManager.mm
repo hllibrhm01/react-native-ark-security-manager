@@ -1,9 +1,10 @@
 #import "ArkSecurityManager.h"
 #import <React/RCTBridgeModule.h>
 
-// Import the Swift implementation. Xcode generates this header automatically
-// from the module name defined in the podspec (ArkSecurityManager).
-#import "ArkSecurityManager-Swift.h"
+// Import the Swift implementation. CocoaPods generates this header from the
+// pod target's PRODUCT_MODULE_NAME, which is set to RNArkSecurityManager to
+// avoid colliding with the ARKSecurityManager SDK dependency.
+#import "RNArkSecurityManager-Swift.h"
 
 @implementation ArkSecurityManager
 
@@ -11,10 +12,6 @@
 // RCT_EXPORT_MODULE registers the module for the Legacy Bridge.
 // The New Architecture uses the Codegen-generated TurboModule binding below.
 RCT_EXPORT_MODULE()
-
-+ (NSString *)moduleName {
-  return @"ArkSecurityManager";
-}
 
 // ── Detection checks ───────────────────────────────────────────────────────
 

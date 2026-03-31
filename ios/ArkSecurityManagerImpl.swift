@@ -42,18 +42,20 @@ public class ArkSecurityManagerImpl: NSObject {
   // MARK: - Screen protection
 
   @objc public static func setScreenSecure(_ enable: Bool) {
-    guard let window = UIApplication.shared.windows.first else { return }
-    if enable {
-      sdk.preventFromScreenshot(view: window)
-      sdk.preventFromScreenRecording(hapticWarning: false) {
-        let blocker = UIView()
-        blocker.backgroundColor = .black
-        return blocker
-      }
-      sdk.preventFromAppSwitcher {
-        let blocker = UIView()
-        blocker.backgroundColor = .black
-        return blocker
+    DispatchQueue.main.async {
+      guard let window = UIApplication.shared.windows.first else { return }
+      if enable {
+        sdk.preventFromScreenshot(view: window)
+        sdk.preventFromScreenRecording(hapticWarning: false) {
+          let blocker = UIView()
+          blocker.backgroundColor = .black
+          return blocker
+        }
+        sdk.preventFromAppSwitcher {
+          let blocker = UIView()
+          blocker.backgroundColor = .black
+          return blocker
+        }
       }
     }
     // Disabling screen secure: no built-in "undo" in the SDK.

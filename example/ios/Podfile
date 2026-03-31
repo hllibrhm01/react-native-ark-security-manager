@@ -19,12 +19,10 @@ end
 target 'ArkSecurityManagerExample' do
   config = use_native_modules!
 
-  # ── Local ARK Security Manager iOS SDK ──────────────────────────────────
-  # Resolved via the local path dependency declared in ArkSecurityManager.podspec.
+  # Local ARK Security Manager iOS SDK
   # The native SDK source must exist at:
   #   <repo-root>/native/ios/Modules/ARKSecurityManager/
-  #
-  # See README.md for setup instructions.
+  pod "ARKSecurityManager", :path => "../../native/ios/Modules/ARKSecurityManager"
 
   use_react_native!(
     :path => config[:reactNativePath],

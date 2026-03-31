@@ -1,3 +1,4 @@
+println "RN ARK SETTINGS EVALUATED"
 // android/settings.gradle
 //
 // Included by the host app's settings.gradle via RN autolinking.

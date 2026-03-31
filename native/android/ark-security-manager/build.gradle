@@ -3,8 +3,8 @@
 // Source: ark-mobile-android-module/ark-security-manager
 
 plugins {
-    alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {

@@ -3,7 +3,8 @@ require "json"
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
 Pod::Spec.new do |s|
-  s.name         = "ArkSecurityManager"
+  s.name         = "ark-security-manager"
+  s.module_name  = "RNArkSecurityManager"
   s.version      = package["version"]
   s.summary      = package["description"]
   s.homepage     = package["homepage"]
@@ -21,6 +22,7 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig = {
     "SWIFT_VERSION"                      => "5.0",
     "DEFINES_MODULE"                     => "YES",
+    "PRODUCT_MODULE_NAME"               => "RNArkSecurityManager",
     "SWIFT_OBJC_BRIDGING_HEADER"         => "",
   }
 
@@ -31,7 +33,7 @@ Pod::Spec.new do |s|
   # The ARKSecurityManager.podspec lives inside that directory.
   # To switch to a remote CocoaPods release, replace with:
   #   s.dependency 'ARKSecurityManager', '0.0.1'
-  s.dependency "ARKSecurityManager", :path => "../native/ios/Modules/ARKSecurityManager"
+  s.dependency "ARKSecurityManager"
 
   install_modules_dependencies(s)
 end
