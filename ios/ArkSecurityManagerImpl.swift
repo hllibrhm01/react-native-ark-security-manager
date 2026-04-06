@@ -12,6 +12,14 @@ import ARKSecurityManager
 public class ArkSecurityManagerImpl: NSObject {
 
   private static let sdk = ArkSecurityManager()
+  private static var screenshotObserver: NSObjectProtocol?
+  private static var screenRecordingObserver: NSObjectProtocol?
+  private static var securityEventHandler: (([String: Any]) -> Void)?
+  private static var isMonitoringSecurityEvents = false
+  private static var hasAppliedScreenshotProtection = false
+
+  /// Tag used to identify blocker views added by screen protection.
+  private static let blockerViewTag = 0xA2C5EC
 
   // MARK: - Detection checks
 
@@ -43,23 +51,99 @@ public class ArkSecurityManagerImpl: NSObject {
 
   @objc public static func setScreenSecure(_ enable: Bool) {
     DispatchQueue.main.async {
-      guard let window = UIApplication.shared.windows.first else { return }
+      guard let window = ArkSecurityManagerImpl.keyWindow() else { return }
       if enable {
-        sdk.preventFromScreenshot(view: window)
-        sdk.preventFromScreenRecording(hapticWarning: false) {
+        if !ArkSecurityManagerImpl.hasAppliedScreenshotProtection {
+          ArkSecurityManagerImpl.sdk.preventFromScreenshot(view: window)
+          ArkSecurityManagerImpl.hasAppliedScreenshotProtection = true
+        }
+        ArkSecurityManagerImpl.sdk.preventFromScreenRecording(hapticWarning: false) {
           let blocker = UIView()
           blocker.backgroundColor = .black
+          blocker.tag = ArkSecurityManagerImpl.blockerViewTag
           return blocker
         }
-        sdk.preventFromAppSwitcher {
+        ArkSecurityManagerImpl.sdk.preventFromAppSwitcher {
           let blocker = UIView()
           blocker.backgroundColor = .black
+          blocker.tag = ArkSecurityManagerImpl.blockerViewTag
           return blocker
         }
+      } else {
+        // Remove blocker views added by screen recording and app switcher protection.
+        ArkSecurityManagerImpl.removeBlockerViews(from: window)
+        ArkSecurityManagerImpl.hasAppliedScreenshotProtection = false
       }
     }
-    // Disabling screen secure: no built-in "undo" in the SDK.
-    // Callers should manage this at the screen level.
+  }
+
+  @objc public static func applyOverviewProtection(_ useBlur: Bool) {
+    _ = useBlur
+    // Android-only feature. Kept as a no-op on iOS for a shared JS API.
+  }
+
+  @objc public static func startSecurityEventMonitoring(
+    _ handler: @escaping ([String: Any]) -> Void
+  ) {
+    DispatchQueue.main.async {
+      ArkSecurityManagerImpl.securityEventHandler = handler
+
+      if !ArkSecurityManagerImpl.isMonitoringSecurityEvents {
+        ArkSecurityManagerImpl.screenshotObserver = NotificationCenter.default.addObserver(
+          forName: UIApplication.userDidTakeScreenshotNotification,
+          object: nil,
+          queue: .main
+        ) { _ in
+          ArkSecurityManagerImpl.emitSecurityEvent(
+            type: "screenshotTaken"
+          )
+        }
+
+        ArkSecurityManagerImpl.screenRecordingObserver = NotificationCenter.default.addObserver(
+          forName: UIScreen.capturedDidChangeNotification,
+          object: nil,
+          queue: .main
+        ) { _ in
+          ArkSecurityManagerImpl.emitScreenRecordingEvent()
+        }
+
+        ArkSecurityManagerImpl.isMonitoringSecurityEvents = true
+      }
+
+      ArkSecurityManagerImpl.emitScreenRecordingEvent()
+    }
+  }
+
+  @objc public static func stopSecurityEventMonitoring() {
+    DispatchQueue.main.async {
+      if let observer = ArkSecurityManagerImpl.screenshotObserver {
+        NotificationCenter.default.removeObserver(observer)
+        ArkSecurityManagerImpl.screenshotObserver = nil
+      }
+
+      if let observer = ArkSecurityManagerImpl.screenRecordingObserver {
+        NotificationCenter.default.removeObserver(observer)
+        ArkSecurityManagerImpl.screenRecordingObserver = nil
+      }
+
+      ArkSecurityManagerImpl.securityEventHandler = nil
+      ArkSecurityManagerImpl.isMonitoringSecurityEvents = false
+    }
+  }
+
+  @objc public static func isScreenRecordingActive() -> Bool {
+    guard Thread.isMainThread else {
+      return DispatchQueue.main.sync {
+        return ArkSecurityManagerImpl.isScreenRecordingActive()
+      }
+    }
+    if let windowScene = UIApplication.shared.connectedScenes
+      .compactMap({ $0 as? UIWindowScene })
+      .first(where: { $0.activationState == .foregroundActive }) {
+      return windowScene.screen.isCaptured
+    }
+
+    return false
   }
 
   // MARK: - Composite report
@@ -78,5 +162,57 @@ public class ArkSecurityManagerImpl: NSObject {
       "isSSLBypassed"             : ssl.hasSSLBypass,
       "isInstalledFromTrustedSource": app.isAppStore || app.isTestFlight,
     ]
+  }
+
+  // MARK: - Private helpers
+
+  private static func removeBlockerViews(from window: UIWindow) {
+    for subview in window.subviews where subview.tag == blockerViewTag {
+      subview.removeFromSuperview()
+    }
+    for subview in window.subviews {
+      removeBlockerViewsRecursive(from: subview)
+    }
+  }
+
+  private static func removeBlockerViewsRecursive(from view: UIView) {
+    for subview in view.subviews {
+      if subview.tag == blockerViewTag {
+        subview.removeFromSuperview()
+      } else {
+        removeBlockerViewsRecursive(from: subview)
+      }
+    }
+  }
+
+  private static func emitSecurityEvent(
+    type: String,
+    extra: [String: Any] = [:]
+  ) {
+    var payload: [String: Any] = [
+      "type": type,
+      "platform": "ios",
+      "timestamp": Int(Date().timeIntervalSince1970 * 1000),
+    ]
+
+    extra.forEach { key, value in
+      payload[key] = value
+    }
+
+    ArkSecurityManagerImpl.securityEventHandler?(payload)
+  }
+
+  private static func emitScreenRecordingEvent() {
+    ArkSecurityManagerImpl.emitSecurityEvent(
+      type: "screenRecordingChanged",
+      extra: ["isRecording": ArkSecurityManagerImpl.isScreenRecordingActive()]
+    )
+  }
+
+  private static func keyWindow() -> UIWindow? {
+    UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .flatMap { $0.windows }
+      .first(where: \.isKeyWindow)
   }
 }

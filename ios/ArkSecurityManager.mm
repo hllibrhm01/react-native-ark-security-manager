@@ -6,12 +6,36 @@
 // avoid colliding with the ARKSecurityManager SDK dependency.
 #import "RNArkSecurityManager-Swift.h"
 
+static NSString *const ArkSecurityManagerSecurityEventName = @"ArkSecurityManager:securityEvent";
+
+@interface ArkSecurityManager ()
+
+@property (nonatomic, assign) BOOL hasListeners;
+
+@end
+
 @implementation ArkSecurityManager
 
 // ── Module registration ────────────────────────────────────────────────────
 // RCT_EXPORT_MODULE registers the module for the Legacy Bridge.
 // The New Architecture uses the Codegen-generated TurboModule binding below.
 RCT_EXPORT_MODULE()
+
++ (BOOL)requiresMainQueueSetup {
+  return YES;
+}
+
+- (NSArray<NSString *> *)supportedEvents {
+  return @[ ArkSecurityManagerSecurityEventName ];
+}
+
+- (void)startObserving {
+  self.hasListeners = YES;
+}
+
+- (void)stopObserving {
+  self.hasListeners = NO;
+}
 
 // ── Detection checks ───────────────────────────────────────────────────────
 
@@ -44,9 +68,29 @@ RCT_EXPORT_MODULE()
 // ── Screen protection ──────────────────────────────────────────────────────
 
 - (void)setScreenSecure:(BOOL)enable {
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [ArkSecurityManagerImpl setScreenSecure:enable];
-  });
+  [ArkSecurityManagerImpl setScreenSecure:enable];
+}
+
+- (void)applyOverviewProtection:(BOOL)useBlur {
+  [ArkSecurityManagerImpl applyOverviewProtection:useBlur];
+}
+
+- (void)startSecurityEventMonitoring {
+  __weak ArkSecurityManager *weakSelf = self;
+  [ArkSecurityManagerImpl startSecurityEventMonitoring:^(NSDictionary *event) {
+    ArkSecurityManager *strongSelf = weakSelf;
+    if (strongSelf != nil && strongSelf.hasListeners) {
+      [strongSelf sendEventWithName:ArkSecurityManagerSecurityEventName body:event];
+    }
+  }];
+}
+
+- (void)stopSecurityEventMonitoring {
+  [ArkSecurityManagerImpl stopSecurityEventMonitoring];
+}
+
+- (NSNumber *)isScreenRecordingActive {
+  return @([ArkSecurityManagerImpl isScreenRecordingActive]);
 }
 
 // ── Android-specific stubs ─────────────────────────────────────────────────
@@ -58,6 +102,10 @@ RCT_EXPORT_MODULE()
 
 - (void)setTrustedStores:(NSArray<NSString *> *)stores {
   // Trusted store list is Android-only; no-op on iOS.
+}
+
+- (void)removeTrustedStore:(NSString *)store {
+  // Trusted store management is Android-only; no-op on iOS.
 }
 
 // ── Composite report ───────────────────────────────────────────────────────

@@ -46,6 +46,34 @@ export interface Spec extends TurboModule {
    */
   setScreenSecure(enable: boolean): void;
 
+  /**
+   * Applies overview / app switcher protection.
+   * Android: Android 12+ blur overlay, older versions fall back to FLAG_SECURE.
+   * iOS: no-op.
+   */
+  applyOverviewProtection(useBlur: boolean): void;
+
+  /**
+   * Starts native screenshot and screen-recording monitoring.
+   * iOS emits events through NativeEventEmitter.
+   * Android: no-op.
+   */
+  startSecurityEventMonitoring(): void;
+
+  /**
+   * Stops native screenshot and screen-recording monitoring.
+   * iOS removes registered observers.
+   * Android: no-op.
+   */
+  stopSecurityEventMonitoring(): void;
+
+  /**
+   * Returns whether the screen is currently being recorded.
+   * iOS uses UIScreen capture state.
+   * Android currently always returns false.
+   */
+  isScreenRecordingActive(): boolean;
+
   // ── Android-specific ─────────────────────────────────────────────────────
 
   /**
@@ -63,6 +91,13 @@ export interface Spec extends TurboModule {
    */
   setTrustedStores(stores: string[]): void;
 
+  /**
+   * Removes a single store from the trusted store list (Android only).
+   * iOS: no-op.
+   * @param store The installer package name to remove.
+   */
+  removeTrustedStore(store: string): void;
+
   // ── Composite report ──────────────────────────────────────────────────────
 
   /**
@@ -70,6 +105,16 @@ export interface Spec extends TurboModule {
    * Returned as UnsafeObject; typed wrapper is in index.ts.
    */
   getSecurityReport(): Object;
+
+  /**
+   * Required by NativeEventEmitter.
+   */
+  addListener(eventName: string): void;
+
+  /**
+   * Required by NativeEventEmitter.
+   */
+  removeListeners(count: number): void;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('ArkSecurityManager');

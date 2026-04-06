@@ -1,6 +1,7 @@
 package com.arksecuritymanager
 
 import android.app.Application
+import android.os.Build
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableArray
@@ -48,7 +49,7 @@ class ArkSecurityManagerModule(private val reactContext: ReactApplicationContext
   // ── Screen protection ───────────────────────────────────────────────────
 
   override fun setScreenSecure(enable: Boolean) {
-    val activity = currentActivity ?: return
+    val activity = getReactApplicationContext().getCurrentActivity() ?: return
     activity.runOnUiThread {
       if (enable) {
         ArkSecurityManager.setWindowSecureFlag(activity)
@@ -58,6 +59,27 @@ class ArkSecurityManagerModule(private val reactContext: ReactApplicationContext
     }
   }
 
+  override fun applyOverviewProtection(useBlur: Boolean) {
+    val activity = getReactApplicationContext().getCurrentActivity() ?: return
+    activity.runOnUiThread {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        ArkSecurityManager.setOverviewScreenSecureView(activity, null, useBlur)
+      } else {
+        ArkSecurityManager.setWindowSecureFlag(activity)
+      }
+    }
+  }
+
+  override fun startSecurityEventMonitoring() {
+    // Screenshot/screen-recording notifications are currently iOS-only.
+  }
+
+  override fun stopSecurityEventMonitoring() {
+    // Screenshot/screen-recording notifications are currently iOS-only.
+  }
+
+  override fun isScreenRecordingActive(): Boolean = false
+
   // ── Android-specific ───────────────────────────────────────────────────
 
   override fun isLocationMocked(isMock: Boolean): Boolean = isMock
@@ -65,6 +87,10 @@ class ArkSecurityManagerModule(private val reactContext: ReactApplicationContext
   override fun setTrustedStores(stores: ReadableArray) {
     val list = (0 until stores.size()).mapNotNull { stores.getString(it) }
     ArkSecurityManager.setTrustedStores(list)
+  }
+
+  override fun removeTrustedStore(store: String) {
+    ArkSecurityManager.removeTrustedStore(store)
   }
 
   // ── Composite report ───────────────────────────────────────────────────
@@ -79,5 +105,13 @@ class ArkSecurityManagerModule(private val reactContext: ReactApplicationContext
     map.putBoolean("isSSLBypassed", false)
     map.putBoolean("isInstalledFromTrustedSource", ArkSecurityManager.isInstalledFromTrustedStore(reactContext))
     return map
+  }
+
+  override fun addListener(eventName: String) {
+    // Required by NativeEventEmitter.
+  }
+
+  override fun removeListeners(count: Double) {
+    // Required by NativeEventEmitter.
   }
 }

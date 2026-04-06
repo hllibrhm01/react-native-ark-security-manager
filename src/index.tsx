@@ -1,3 +1,4 @@
+import { NativeEventEmitter } from 'react-native';
 import NativeArkSecurityManager from './NativeArkSecurityManager';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -10,6 +11,28 @@ export interface SecurityReport {
   isSSLBypassed: boolean;
   isInstalledFromTrustedSource: boolean;
 }
+
+export type SecurityEvent =
+  | {
+    type: 'screenshotTaken';
+    platform: 'ios';
+    timestamp: number;
+  }
+  | {
+    type: 'screenRecordingChanged';
+    platform: 'ios';
+    timestamp: number;
+    isRecording: boolean;
+  };
+
+export interface SecurityEventSubscription {
+  remove(): void;
+}
+
+const SECURITY_EVENT_NAME = 'ArkSecurityManager:securityEvent';
+const securityEventEmitter = new NativeEventEmitter(
+  NativeArkSecurityManager as never
+);
 
 // ─── API ─────────────────────────────────────────────────────────────────────
 
@@ -70,6 +93,52 @@ export function setScreenSecure(enable: boolean): void {
 }
 
 /**
+ * Applies overview/app switcher protection.
+ * Android 12+ uses blur/overlay protection. Older versions fall back to FLAG_SECURE.
+ * iOS: no-op.
+ */
+export function applyOverviewProtection(useBlur = true): void {
+  NativeArkSecurityManager.applyOverviewProtection(useBlur);
+}
+
+/**
+ * Starts native screenshot and screen-recording monitoring.
+ * iOS emits `SecurityEvent` payloads through a native event emitter.
+ * Android: no-op.
+ */
+export function startSecurityEventMonitoring(): void {
+  NativeArkSecurityManager.startSecurityEventMonitoring();
+}
+
+/**
+ * Stops native screenshot and screen-recording monitoring.
+ * Android: no-op.
+ */
+export function stopSecurityEventMonitoring(): void {
+  NativeArkSecurityManager.stopSecurityEventMonitoring();
+}
+
+/**
+ * Returns whether the screen is currently being recorded.
+ * Android currently always returns false.
+ */
+export function isScreenRecordingActive(): boolean {
+  return NativeArkSecurityManager.isScreenRecordingActive();
+}
+
+/**
+ * Subscribes to native screenshot and screen-recording events.
+ */
+export function addSecurityEventListener(
+  listener: (event: SecurityEvent) => void
+): SecurityEventSubscription {
+  return securityEventEmitter.addListener(
+    SECURITY_EVENT_NAME,
+    listener as (event: unknown) => void
+  );
+}
+
+/**
  * Returns true if the given location is mocked.
  * Android only — always returns false on iOS.
  * @param isMock Pass the `isMock` / `isFromMockProvider` boolean from your native location object.
@@ -85,6 +154,15 @@ export function isLocationMocked(isMock: boolean): boolean {
  */
 export function setTrustedStores(stores: string[]): void {
   NativeArkSecurityManager.setTrustedStores(stores);
+}
+
+/**
+ * Removes a single store from the trusted store list.
+ * Android only — no-op on iOS.
+ * @param store The installer package name to remove.
+ */
+export function removeTrustedStore(store: string): void {
+  NativeArkSecurityManager.removeTrustedStore(store);
 }
 
 /**
