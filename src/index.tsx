@@ -14,16 +14,16 @@ export interface SecurityReport {
 
 export type SecurityEvent =
   | {
-    type: 'screenshotTaken';
-    platform: 'ios';
-    timestamp: number;
-  }
+      type: 'screenshotTaken';
+      platform: 'ios';
+      timestamp: number;
+    }
   | {
-    type: 'screenRecordingChanged';
-    platform: 'ios';
-    timestamp: number;
-    isRecording: boolean;
-  };
+      type: 'screenRecordingChanged';
+      platform: 'ios';
+      timestamp: number;
+      isRecording: boolean;
+    };
 
 export interface SecurityEventSubscription {
   remove(): void;

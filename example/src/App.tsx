@@ -56,15 +56,17 @@ export default function App() {
   };
 
   const addLog = useCallback((key: string, message: string) => {
-    setActionLogs((prev) => [{ key, message, timestamp: Date.now() }, ...prev].slice(0, 20));
+    setActionLogs((prev) =>
+      [{ key, message, timestamp: Date.now() }, ...prev].slice(0, 20)
+    );
   }, []);
 
-  const runSingleCheck = useCallback(
-    (key: string, value: boolean) => {
-      setCheckResults((prev) => ({ ...prev, [key]: { value, timestamp: Date.now() } }));
-    },
-    []
-  );
+  const runSingleCheck = useCallback((key: string, value: boolean) => {
+    setCheckResults((prev) => ({
+      ...prev,
+      [key]: { value, timestamp: Date.now() },
+    }));
+  }, []);
 
   const handleSetScreenSecure = (enable: boolean) => {
     setScreenSecure(enable);
@@ -83,12 +85,12 @@ export default function App() {
     );
   };
 
-  const startMonitoring = () => {
+  const startMonitoring = useCallback(() => {
     startSecurityEventMonitoring();
     setMonitoringActive(true);
     setScreenRecordingState(isScreenRecordingActive());
     addLog('monitoring', 'Screenshot and screen recording monitoring started.');
-  };
+  }, [addLog]);
 
   const stopMonitoring = () => {
     stopSecurityEventMonitoring();
@@ -101,7 +103,9 @@ export default function App() {
     setScreenRecordingState(isScreenRecordingActive());
 
     const subscription = addSecurityEventListener((event) => {
-      setSecurityEvents((current) => [event, ...current].slice(0, MAX_EVENT_LOGS));
+      setSecurityEvents((current) =>
+        [event, ...current].slice(0, MAX_EVENT_LOGS)
+      );
       if (event.type === 'screenRecordingChanged') {
         setScreenRecordingState(event.isRecording);
       }
@@ -115,7 +119,7 @@ export default function App() {
       subscription.remove();
       stopSecurityEventMonitoring();
     };
-  }, []);
+  }, [startMonitoring]);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -130,11 +134,32 @@ export default function App() {
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Security Report</Text>
             <Row label="Debugger attached" value={report.isDebuggerAttached} />
-            {isAndroid && <Row label="Developer options" value={report.isDeveloperOptionsEnabled} />}
-            <Row label="Device compromised" value={report.isDeviceCompromised} danger />
-            {isAndroid && <Row label="Frida detected" value={report.isFridaDetected} danger />}
-            {isIOS && <Row label="SSL bypass" value={report.isSSLBypassed} danger />}
-            <Row label="Trusted install source" value={report.isInstalledFromTrustedSource} invert />
+            {isAndroid && (
+              <Row
+                label="Developer options"
+                value={report.isDeveloperOptionsEnabled}
+              />
+            )}
+            <Row
+              label="Device compromised"
+              value={report.isDeviceCompromised}
+              danger
+            />
+            {isAndroid && (
+              <Row
+                label="Frida detected"
+                value={report.isFridaDetected}
+                danger
+              />
+            )}
+            {isIOS && (
+              <Row label="SSL bypass" value={report.isSSLBypassed} danger />
+            )}
+            <Row
+              label="Trusted install source"
+              value={report.isInstalledFromTrustedSource}
+              invert
+            />
             <ActionButton label="Refresh Report" onPress={runChecks} compact />
           </View>
         )}
@@ -144,26 +169,30 @@ export default function App() {
           <Text style={styles.sectionTitle}>Security Tests</Text>
           <CheckButton
             label="Debugger"
-            result={checkResults['debugger']}
+            result={checkResults.debugger}
             onPress={() => runSingleCheck('debugger', isDebuggerAttached())}
           />
           {isAndroid && (
             <CheckButton
               label="Developer Options"
-              result={checkResults['developerOptions']}
-              onPress={() => runSingleCheck('developerOptions', isDeveloperOptionsEnabled())}
+              result={checkResults.developerOptions}
+              onPress={() =>
+                runSingleCheck('developerOptions', isDeveloperOptionsEnabled())
+              }
             />
           )}
           <CheckButton
             label={isIOS ? 'Jailbreak' : 'Root'}
-            result={checkResults['deviceCompromised']}
-            onPress={() => runSingleCheck('deviceCompromised', isDeviceCompromised())}
+            result={checkResults.deviceCompromised}
+            onPress={() =>
+              runSingleCheck('deviceCompromised', isDeviceCompromised())
+            }
             danger
           />
           {isAndroid && (
             <CheckButton
               label="Frida"
-              result={checkResults['frida']}
+              result={checkResults.frida}
               onPress={() => runSingleCheck('frida', isFridaDetected())}
               danger
             />
@@ -171,15 +200,17 @@ export default function App() {
           {isIOS && (
             <CheckButton
               label="SSL Bypass"
-              result={checkResults['sslBypass']}
+              result={checkResults.sslBypass}
               onPress={() => runSingleCheck('sslBypass', isSSLBypassed())}
               danger
             />
           )}
           <CheckButton
             label="Trusted Source"
-            result={checkResults['trustedSource']}
-            onPress={() => runSingleCheck('trustedSource', isInstalledFromTrustedSource())}
+            result={checkResults.trustedSource}
+            onPress={() =>
+              runSingleCheck('trustedSource', isInstalledFromTrustedSource())
+            }
             invert
           />
         </View>
@@ -201,7 +232,10 @@ export default function App() {
             />
           </View>
           {isAndroid && (
-            <ActionButton label="Apply Overview Protection" onPress={handleOverviewProtection} />
+            <ActionButton
+              label="Apply Overview Protection"
+              onPress={handleOverviewProtection}
+            />
           )}
         </View>
 
@@ -213,7 +247,10 @@ export default function App() {
               label="Remove Test Store"
               onPress={() => {
                 removeTrustedStore('com.example.store');
-                addLog('removeTrustedStore', 'Removed com.example.store from trusted stores list.');
+                addLog(
+                  'removeTrustedStore',
+                  'Removed com.example.store from trusted stores list.'
+                );
               }}
             />
           </View>
@@ -224,7 +261,11 @@ export default function App() {
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Monitoring</Text>
             <View style={styles.statusGrid}>
-              <StatusPill label="Monitoring" value={monitoringActive ? 'ON' : 'OFF'} active={monitoringActive} />
+              <StatusPill
+                label="Monitoring"
+                value={monitoringActive ? 'ON' : 'OFF'}
+                active={monitoringActive}
+              />
               <StatusPill
                 label="Recording"
                 value={screenRecordingActive ? 'ACTIVE' : 'IDLE'}
@@ -232,7 +273,12 @@ export default function App() {
               />
             </View>
             <View style={styles.buttonRow}>
-              <ActionButton label="Start" onPress={startMonitoring} active={monitoringActive} flex />
+              <ActionButton
+                label="Start"
+                onPress={startMonitoring}
+                active={monitoringActive}
+                flex
+              />
               <ActionButton label="Stop" onPress={stopMonitoring} flex />
             </View>
             <ActionButton
@@ -240,7 +286,10 @@ export default function App() {
               onPress={() => {
                 const active = isScreenRecordingActive();
                 setScreenRecordingState(active);
-                addLog('screenRecording', `Screen recording active: ${String(active)}`);
+                addLog(
+                  'screenRecording',
+                  `Screen recording active: ${String(active)}`
+                );
               }}
               compact
             />
@@ -255,7 +304,9 @@ export default function App() {
           ) : (
             actionLogs.map((log) => (
               <View key={`${log.key}-${log.timestamp}`} style={styles.logRow}>
-                <Text style={styles.logTime}>{new Date(log.timestamp).toLocaleTimeString()}</Text>
+                <Text style={styles.logTime}>
+                  {new Date(log.timestamp).toLocaleTimeString()}
+                </Text>
                 <Text style={styles.logValue}>{log.message}</Text>
               </View>
             ))
@@ -268,17 +319,23 @@ export default function App() {
             <Text style={styles.sectionTitle}>Native Security Events</Text>
             {securityEvents.length === 0 ? (
               <Text style={styles.emptyText}>
-                No events yet. Take a screenshot or start screen recording after monitoring begins.
+                No events yet. Take a screenshot or start screen recording after
+                monitoring begins.
               </Text>
             ) : (
               securityEvents.map((event, index) => (
-                <View key={`${event.type}-${event.timestamp}-${index}`} style={styles.eventCard}>
+                <View
+                  key={`${event.type}-${event.timestamp}-${index}`}
+                  style={styles.eventCard}
+                >
                   <Text style={styles.eventTitle}>{event.type}</Text>
                   <Text style={styles.eventMeta}>
                     {new Date(event.timestamp).toLocaleTimeString()}
                   </Text>
                   {'isRecording' in event && (
-                    <Text style={styles.eventMeta}>isRecording: {String(event.isRecording)}</Text>
+                    <Text style={styles.eventMeta}>
+                      isRecording: {String(event.isRecording)}
+                    </Text>
                   )}
                 </View>
               ))
@@ -304,7 +361,9 @@ function Row({ label, value, danger, invert }: RowProps) {
   return (
     <View style={styles.row}>
       <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={[styles.rowValue, isAlert && styles.rowAlert]}>{value ? 'YES' : 'NO'}</Text>
+      <Text style={[styles.rowValue, isAlert && styles.rowAlert]}>
+        {value ? 'YES' : 'NO'}
+      </Text>
     </View>
   );
 }
@@ -317,9 +376,16 @@ type CheckButtonProps = {
   invert?: boolean;
 };
 
-function CheckButton({ label, result, onPress, danger, invert }: CheckButtonProps) {
+function CheckButton({
+  label,
+  result,
+  onPress,
+  danger,
+  invert,
+}: CheckButtonProps) {
   const hasResult = result !== undefined;
-  const isAlert = hasResult && (danger ? result.value : invert ? !result.value : false);
+  const isAlert =
+    hasResult && (danger ? result.value : invert ? !result.value : false);
   const isSafe = hasResult && !isAlert;
 
   return (
@@ -327,14 +393,25 @@ function CheckButton({ label, result, onPress, danger, invert }: CheckButtonProp
       accessibilityRole="button"
       style={[
         styles.checkButton,
-        hasResult && (isAlert ? styles.checkButtonDanger : styles.checkButtonSafe),
+        hasResult &&
+          (isAlert ? styles.checkButtonDanger : styles.checkButtonSafe),
       ]}
       onPress={onPress}
     >
       <Text style={styles.checkButtonLabel}>{label}</Text>
       {hasResult ? (
-        <View style={[styles.resultBadge, isAlert ? styles.badgeDanger : styles.badgeSafe]}>
-          <Text style={[styles.resultBadgeText, isSafe && styles.resultBadgeTextSafe]}>
+        <View
+          style={[
+            styles.resultBadge,
+            isAlert ? styles.badgeDanger : styles.badgeSafe,
+          ]}
+        >
+          <Text
+            style={[
+              styles.resultBadgeText,
+              isSafe && styles.resultBadgeTextSafe,
+            ]}
+          >
             {result.value ? 'TRUE' : 'FALSE'}
           </Text>
         </View>
@@ -353,7 +430,13 @@ type ActionButtonProps = {
   flex?: boolean;
 };
 
-function ActionButton({ label, onPress, active, compact, flex }: ActionButtonProps) {
+function ActionButton({
+  label,
+  onPress,
+  active,
+  compact,
+  flex,
+}: ActionButtonProps) {
   return (
     <TouchableOpacity
       accessibilityRole="button"
@@ -365,7 +448,9 @@ function ActionButton({ label, onPress, active, compact, flex }: ActionButtonPro
       ]}
       onPress={onPress}
     >
-      <Text style={[styles.buttonText, compact && styles.buttonTextCompact]}>{label}</Text>
+      <Text style={[styles.buttonText, compact && styles.buttonTextCompact]}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -390,7 +475,12 @@ function StatusPill({ label, value, active }: StatusPillProps) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0f0f0f' },
   container: { padding: 20, gap: 14 },
-  title: { fontSize: 22, fontWeight: '700', color: '#fff', textAlign: 'center' },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#fff',
+    textAlign: 'center',
+  },
   subtitle: { fontSize: 13, color: '#888', textAlign: 'center', marginTop: 2 },
   loader: { marginVertical: 12 },
   card: {
@@ -444,7 +534,12 @@ const styles = StyleSheet.create({
   },
   badgeSafe: { backgroundColor: '#1b5e20' },
   badgeDanger: { backgroundColor: '#b71c1c' },
-  resultBadgeText: { color: '#fff', fontSize: 12, fontWeight: '800', letterSpacing: 0.5 },
+  resultBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
   resultBadgeTextSafe: { color: '#c8e6c9' },
 
   // Action buttons
