@@ -1,0 +1,13 @@
+{
+  "extends": "@react-native/typescript-config",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "customConditions": ["react-native-strict-api"],
+    "moduleResolution": "bundler",
+    "paths": {
+      "react-native-ark-security-manager": ["../src/index"],
+      "react-native-ark-security-manager/*": ["../src/*"]
+    }
+  },
+  "include": ["./src/**/*", "./index.js"]
+}

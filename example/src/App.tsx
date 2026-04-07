@@ -102,7 +102,7 @@ export default function App() {
     runChecks();
     setScreenRecordingState(isScreenRecordingActive());
 
-    const subscription = addSecurityEventListener((event) => {
+    const subscription = addSecurityEventListener((event: SecurityEvent) => {
       setSecurityEvents((current) =>
         [event, ...current].slice(0, MAX_EVENT_LOGS)
       );
@@ -394,7 +394,7 @@ function CheckButton({
       style={[
         styles.checkButton,
         hasResult &&
-          (isAlert ? styles.checkButtonDanger : styles.checkButtonSafe),
+        (isAlert ? styles.checkButtonDanger : styles.checkButtonSafe),
       ]}
       onPress={onPress}
     >
