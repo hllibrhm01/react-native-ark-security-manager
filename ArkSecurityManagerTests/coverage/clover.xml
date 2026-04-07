@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1775570798083" clover="3.2.0">
+  <project timestamp="1775570798083" name="All files">
+    <metrics statements="38" coveredstatements="38" conditionals="1" coveredconditionals="1" methods="16" coveredmethods="16" elements="55" coveredelements="55" complexity="0" loc="38" ncloc="38" packages="1" files="2" classes="2"/>
+    <file name="NativeArkSecurityManager.ts" path="/Users/halil/Desktop/libraries/react-native-ark-security-manager/src/NativeArkSecurityManager.ts">
+      <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <line num="1" count="4" type="stmt"/>
+      <line num="120" count="4" type="stmt"/>
+    </file>
+    <file name="index.tsx" path="/Users/halil/Desktop/libraries/react-native-ark-security-manager/src/index.tsx">
+      <metrics statements="36" coveredstatements="36" conditionals="1" coveredconditionals="1" methods="16" coveredmethods="16"/>
+      <line num="1" count="3" type="stmt"/>
+      <line num="2" count="3" type="stmt"/>
+      <line num="32" count="3" type="stmt"/>
+      <line num="33" count="3" type="stmt"/>
+      <line num="43" count="3" type="stmt"/>
+      <line num="44" count="1" type="stmt"/>
+      <line num="51" count="3" type="stmt"/>
+      <line num="52" count="1" type="stmt"/>
+      <line num="58" count="3" type="stmt"/>
+      <line num="59" count="1" type="stmt"/>
+      <line num="66" count="3" type="stmt"/>
+      <line num="67" count="1" type="stmt"/>
+      <line num="74" count="3" type="stmt"/>
+      <line num="75" count="1" type="stmt"/>
+      <line num="83" count="3" type="stmt"/>
+      <line num="84" count="1" type="stmt"/>
+      <line num="91" count="3" type="stmt"/>
+      <line num="92" count="2" type="stmt"/>
+      <line num="100" count="3" type="cond" truecount="1" falsecount="0"/>
+      <line num="101" count="2" type="stmt"/>
+      <line num="109" count="3" type="stmt"/>
+      <line num="110" count="1" type="stmt"/>
+      <line num="117" count="3" type="stmt"/>
+      <line num="118" count="1" type="stmt"/>
+      <line num="125" count="3" type="stmt"/>
+      <line num="126" count="1" type="stmt"/>
+      <line num="132" count="3" type="stmt"/>
+      <line num="135" count="3" type="stmt"/>
+      <line num="146" count="3" type="stmt"/>
+      <line num="147" count="2" type="stmt"/>
+      <line num="155" count="3" type="stmt"/>
+      <line num="156" count="1" type="stmt"/>
+      <line num="164" count="3" type="stmt"/>
+      <line num="165" count="1" type="stmt"/>
+      <line num="172" count="3" type="stmt"/>
+      <line num="173" count="2" type="stmt"/>
+    </file>
+  </project>
+</coverage>

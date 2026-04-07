@@ -24,6 +24,20 @@ export default defineConfig([
     },
   },
   {
-    ignores: ['node_modules/', 'lib/'],
+    files: ['ArkSecurityManagerTests/**/*.{js,ts,tsx}'],
+    languageOptions: {
+      globals: {
+        afterAll: 'readonly',
+        beforeAll: 'readonly',
+        beforeEach: 'readonly',
+        describe: 'readonly',
+        expect: 'readonly',
+        it: 'readonly',
+        jest: 'readonly',
+      },
+    },
+  },
+  {
+    ignores: ['ArkSecurityManagerTests/coverage/', 'node_modules/', 'lib/'],
   },
 ]);

@@ -1,0 +1,57 @@
+{
+    "preset": "react-native",
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+        "/node_modules/",
+        ".*\\.example\\.(js|ts)$"
+    ],
+    "moduleFileExtensions": [
+        "ts",
+        "tsx",
+        "js",
+        "jsx",
+        "json"
+    ],
+    "transform": {
+        "^.+\\.(ts|tsx)$": [
+            "ts-jest",
+            {
+                "tsconfig": {
+                    "module": "commonjs",
+                    "verbatimModuleSyntax": false,
+                    "esModuleInterop": true,
+                    "allowSyntheticDefaultImports": true
+                }
+            }
+        ],
+        "^.+\\.(js|jsx)$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+        "node_modules/(?!(react-native|@react-native)/)"
+    ],
+    "testMatch": [
+        "**/ArkSecurityManagerTests/**/*.(test|spec).(ts|tsx|js)"
+    ],
+    "moduleNameMapper": {
+        "^react-native-ark-security-manager$": "<rootDir>/src/index.tsx"
+    },
+    "setupFilesAfterEnv": [
+        "<rootDir>/ArkSecurityManagerTests/setupTests.ts"
+    ],
+    "collectCoverageFrom": [
+        "src/**/*.{ts,tsx}",
+        "!src/**/*.d.ts"
+    ],
+    "coverageThreshold": {
+        "global": {
+            "branches": 95,
+            "functions": 95,
+            "lines": 95,
+            "statements": 95
+        }
+    },
+    "coverageDirectory": "ArkSecurityManagerTests/coverage",
+    "verbose": true,
+    "clearMocks": true,
+    "restoreMocks": true
+}
